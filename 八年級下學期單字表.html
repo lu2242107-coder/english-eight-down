@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="zh-TW">
 <head>
     <meta charset="UTF-8">
@@ -43,7 +43,7 @@
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 4rem; /* 放大Emoji作為圖像記憶 */
+            font-size: 4rem; 
             filter: contrast(1.2) saturate(1.5);
         }
 
@@ -73,7 +73,7 @@
                 </div>
             </div>
             
-            <div class="flex items-center gap-4 bg-zinc-900 border border-zinc-700 px-6 py-2 rounded transform skew-x-[-10deg]">
+            <div class="flex items-center gap-4 bg-zinc-900 border border-zinc-700 px-4 md:px-6 py-2 rounded transform skew-x-[-10deg]">
                 <div class="flex flex-col items-center skew-x-[10deg]">
                     <span class="text-[10px] text-zinc-500 font-bold uppercase">目前站點</span>
                     <span id="current-stage" class="font-speed text-xl text-white">DAY 1</span>
@@ -83,6 +83,12 @@
                     <span class="text-[10px] text-zinc-500 font-bold uppercase">對手狀態</span>
                     <span id="rival-status" class="font-speed text-xl text-red-500">領先中</span>
                 </div>
+                <div class="w-px h-6 bg-zinc-700 skew-x-[10deg]"></div>
+                
+                <!-- 新增：切換至總複習第三頁的按鈕 -->
+                <button onclick="switchView('review')" class="skew-x-[10deg] bg-zinc-800 hover:bg-zinc-700 border border-zinc-600 text-cyan-400 px-3 py-1 rounded text-xs font-bold transition-all shadow-[0_0_10px_rgba(6,182,212,0.2)]">
+                    📖 總複習
+                </button>
             </div>
         </div>
     </header>
@@ -153,24 +159,57 @@
             <div id="quiz-container" class="bg-zinc-900 border border-zinc-700 rounded-xl p-8 mb-6">
                 <!-- 動態生成題目 -->
             </div>
+            
+            <div class="text-center">
+                <button onclick="switchView('learning')" class="text-zinc-500 hover:text-white transition-colors text-sm underline">放棄測驗，返回賽道</button>
+            </div>
         </div>
     </main>
 
+    <!-- ================= VIEW 3: 總複習單字庫 ================= -->
+    <main id="view-review" class="max-w-4xl mx-auto px-4 md:px-8 hidden-view view-transition">
+        <div class="cyber-panel rounded-2xl p-6 md:p-8 border-2 border-cyan-500 relative overflow-hidden">
+            <div class="absolute top-0 left-0 w-full h-2 bg-cyan-500"></div>
+            
+            <div class="flex justify-between items-center mb-6 border-b border-zinc-800 pb-4">
+                <div>
+                    <h2 class="text-3xl italic-fast text-white tracking-widest drop-shadow-[0_0_10px_rgba(6,182,212,0.8)]">全賽季單字總覽</h2>
+                    <p class="text-zinc-400 text-sm mt-1">目前已解鎖： <span id="review-count" class="text-cyan-400 font-bold font-speed text-xl">0</span> 個單字</p>
+                </div>
+                <button onclick="switchView('learning')" class="bg-zinc-800 hover:bg-zinc-700 text-white px-4 py-2 rounded-lg border border-zinc-600 transition-all font-bold text-sm">
+                    🔙 返回主賽道
+                </button>
+            </div>
+
+            <!-- 複習單字列表 -->
+            <div id="review-list-container" class="grid grid-cols-1 md:grid-cols-2 gap-4 max-h-[60vh] overflow-y-auto pr-2 custom-scrollbar">
+                <!-- JS 動態產生列表 -->
+            </div>
+        </div>
+        
+        <style>
+            .custom-scrollbar::-webkit-scrollbar { width: 6px; }
+            .custom-scrollbar::-webkit-scrollbar-track { background: #18181b; border-radius: 4px; }
+            .custom-scrollbar::-webkit-scrollbar-thumb { background: #3f3f46; border-radius: 4px; }
+            .custom-scrollbar::-webkit-scrollbar-thumb:hover { background: #06b6d4; }
+        </style>
+    </main>
+
     <script>
-        // 單字庫：還原圖像記憶 (Emoji) 並保留字根
+        // 單字庫：還原圖像記憶 (Emoji) 並保留字根，新增國中會考等級生活化例句
         const wordDatabase = [
             // DAY 1
-            { word: "location", pos: "n.", zh: "地點 / 位置", root: "loc (地方) + ation (名詞)", img: "📍", color: "cyan" },
-            { word: "strategy", pos: "n.", zh: "策略 / 計畫", root: "strat (層次) + egy (名詞)", img: "♟️", color: "red" },
-            { word: "practice", pos: "v.", zh: "練習 / 實踐", root: "pract (行動) + ice (名詞)", img: "🎯", color: "green" },
+            { word: "location", pos: "n.", zh: "地點 / 位置", root: "loc (地方) + ation (名詞)", img: "📍", color: "cyan", en_eg: "The new restaurant is in a great location.", zh_eg: "這家新餐廳的地點很棒。" },
+            { word: "strategy", pos: "n.", zh: "策略 / 計畫", root: "strat (層次) + egy (名詞)", img: "♟️", color: "red", en_eg: "Studying every day is a good strategy for the test.", zh_eg: "每天讀書是準備考試的好策略。" },
+            { word: "practice", pos: "v.", zh: "練習 / 實踐", root: "pract (行動) + ice (名詞)", img: "🎯", color: "green", en_eg: "I practice playing the piano every weekend.", zh_eg: "我每個週末都練習彈鋼琴。" },
             // DAY 2
-            { word: "memory", pos: "n.", zh: "記憶", root: "memor (記住) + y (名詞)", img: "🧠", color: "purple" },
-            { word: "pronounce", pos: "v.", zh: "發音", root: "pro (向前) + nounce (呼喊)", img: "🗣️", color: "yellow" },
-            { word: "environment", pos: "n.", zh: "環境", root: "environ (環繞) + ment (名詞)", img: "🏙️", color: "emerald" },
+            { word: "memory", pos: "n.", zh: "記憶", root: "memor (記住) + y (名詞)", img: "🧠", color: "purple", en_eg: "My grandpa has a very good memory.", zh_eg: "我爺爺的記憶力非常好。" },
+            { word: "pronounce", pos: "v.", zh: "發音", root: "pro (向前) + nounce (呼喊)", img: "🗣️", color: "yellow", en_eg: "How do you pronounce this English word?", zh_eg: "你怎麼發音這個英文單字？" },
+            { word: "environment", pos: "n.", zh: "環境", root: "environ (環繞) + ment (名詞)", img: "🏙️", color: "emerald", en_eg: "We should do our best to protect the environment.", zh_eg: "我們應該盡力保護環境。" },
             // DAY 3
-            { word: "destination", pos: "n.", zh: "目的地", root: "de (向下) + stin (站立) + ation", img: "🏁", color: "orange" },
-            { word: "opponent", pos: "n.", zh: "對手", root: "op (反對) + pon (放置) + ent (人)", img: "🦹‍♂️", color: "rose" },
-            { word: "victory", pos: "n.", zh: "勝利", root: "vict (征服) + ory (狀態)", img: "🏆", color: "amber" }
+            { word: "destination", pos: "n.", zh: "目的地", root: "de (向下) + stin (站立) + ation", img: "🏁", color: "orange", en_eg: "Taipei is our final destination today.", zh_eg: "台北是我們今天的最終目的地。" },
+            { word: "opponent", pos: "n.", zh: "對手", root: "op (反對) + pon (放置) + ent (人)", img: "🦹‍♂️", color: "rose", en_eg: "He is a very strong opponent in the game.", zh_eg: "他在比賽中是個很強的對手。" },
+            { word: "victory", pos: "n.", zh: "勝利", root: "vict (征服) + ory (狀態)", img: "🏆", color: "amber", en_eg: "Our team worked hard for this victory.", zh_eg: "我們隊伍為了這次勝利非常努力。" }
         ];
 
         let currentDayIndex = 0; 
@@ -183,11 +222,9 @@
         let isPronunciationPassed = false;
         let isMeaningPassed = false;
 
-        // 取得真實當天日期，並根據 currentDayIndex 偏移
         function updateDateDisplay() {
             const dateObj = new Date();
             dateObj.setDate(dateObj.getDate() + currentDayIndex);
-            
             const options = { year: 'numeric', month: '2-digit', day: '2-digit', weekday: 'short' };
             const formattedDate = dateObj.toLocaleDateString('zh-TW', options);
             document.getElementById('real-date-display').innerText = `作戰日期：${formattedDate}`;
@@ -196,15 +233,19 @@
         function switchView(viewName) {
             const learningView = document.getElementById('view-learning');
             const examView = document.getElementById('view-exam');
+            const reviewView = document.getElementById('view-review');
+            
+            learningView.className = viewName === 'learning' ? 'max-w-6xl mx-auto px-4 md:px-8 active-view view-transition' : 'max-w-6xl mx-auto px-4 md:px-8 hidden-view view-transition';
+            examView.className = viewName === 'exam' ? 'max-w-4xl mx-auto px-4 md:px-8 active-view view-transition' : 'max-w-4xl mx-auto px-4 md:px-8 hidden-view view-transition';
+            reviewView.className = viewName === 'review' ? 'max-w-4xl mx-auto px-4 md:px-8 active-view view-transition' : 'max-w-4xl mx-auto px-4 md:px-8 hidden-view view-transition';
             
             if (viewName === 'learning') {
-                learningView.className = 'max-w-6xl mx-auto px-4 md:px-8 active-view view-transition';
-                examView.className = 'max-w-4xl mx-auto px-4 md:px-8 hidden-view view-transition';
                 renderWords();
+                updateRaceTrack();
             } else if (viewName === 'exam') {
-                learningView.className = 'max-w-6xl mx-auto px-4 md:px-8 hidden-view view-transition';
-                examView.className = 'max-w-4xl mx-auto px-4 md:px-8 active-view view-transition';
                 initExam();
+            } else if (viewName === 'review') {
+                renderReviewList();
             }
         }
 
@@ -247,7 +288,6 @@
             window.speechSynthesis.speak(utterance);
         }
 
-        // --- 學習模式：發音核對功能 ---
         function checkPronunciationLearning(expectedText, buttonElement, color) {
             const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
             if (!SpeechRecognition) return alert("不支援語音辨識。請使用 Chrome。");
@@ -255,7 +295,9 @@
             const recognition = new SpeechRecognition();
             recognition.lang = 'en-US';
             const originalHtml = buttonElement.innerHTML;
-            buttonElement.innerHTML = '🎙️ 聆聽中...';
+            
+            const isSentence = originalHtml.includes('🎤') && !originalHtml.includes('錄音核對單字');
+            buttonElement.innerHTML = isSentence ? '⏳' : '🎙️ 聆聽中...';
             buttonElement.classList.add('animate-pulse', `text-${color}-400`);
 
             recognition.start();
@@ -265,17 +307,17 @@
                 buttonElement.classList.remove('animate-pulse', `text-${color}-400`);
                 
                 if (transcript === targetText || transcript.includes(targetText) || targetText.includes(transcript)) {
-                    buttonElement.innerHTML = '✅ 發音精準！';
+                    buttonElement.innerHTML = isSentence ? '✅' : '✅ 發音精準！';
                     buttonElement.classList.add('bg-green-600', 'text-white');
                 } else {
-                    buttonElement.innerHTML = '❌ 再試一次';
+                    buttonElement.innerHTML = isSentence ? '❌' : '❌ 再試一次';
                     alert(`語音核對失敗！\n您唸的是: ${transcript}\n正確應為: ${targetText}`);
                 }
                 setTimeout(() => { buttonElement.innerHTML = originalHtml; buttonElement.classList.remove('bg-green-600', 'text-white'); }, 3000);
             };
             recognition.onerror = () => {
                 buttonElement.classList.remove('animate-pulse');
-                buttonElement.innerHTML = '⚠️ 失敗';
+                buttonElement.innerHTML = isSentence ? '⚠️' : '⚠️ 失敗';
                 setTimeout(() => { buttonElement.innerHTML = originalHtml; }, 2000);
             };
         }
@@ -290,10 +332,10 @@
             todaysWords.forEach((item) => {
                 const card = document.createElement('div');
                 card.className = `cyber-panel p-2 rounded-xl transition-transform hover:-translate-y-2 border-b-4 border-${item.color}-500`;
-                
+                const safeSentence = item.en_eg.replace(/'/g, "\\'");
+
                 card.innerHTML = `
                     <div class="bg-zinc-950 h-full rounded-lg p-5 flex flex-col relative overflow-hidden">
-                        <!-- 動漫風格圖像記憶 -->
                         <div class="manga-panel p-2 mb-4 transform -rotate-1 hover:rotate-0 transition-transform">
                             <div class="manga-image-container h-32 bg-${item.color}-100/10">
                                 ${item.img}
@@ -303,15 +345,26 @@
                         <div class="mb-4">
                             <div class="flex justify-between items-end mb-1">
                                 <h2 class="text-4xl italic-fast text-white">${item.word}</h2>
-                                <button onclick="speakWord('${item.word}')" class="text-zinc-400 hover:text-white mb-1 text-xl">🔊</button>
+                                <button onclick="speakWord('${item.word}')" class="text-zinc-400 hover:text-white mb-1 text-xl" title="單字發音">🔊</button>
                             </div>
                             <span class="text-[11px] bg-zinc-800 text-zinc-300 px-2 py-1 rounded uppercase tracking-widest">${item.pos} ${item.zh}</span>
                         </div>
 
-                        <!-- 錄音核對功能 -->
                         <button onclick="checkPronunciationLearning('${item.word}', this, '${item.color}')" class="w-full mb-4 bg-zinc-800 hover:bg-zinc-700 border border-zinc-600 text-zinc-300 py-2 rounded font-bold transition-all text-sm tracking-wider">
-                            🎤 錄音核對發音
+                            🎤 錄音核對單字
                         </button>
+
+                        <div class="bg-zinc-900 border border-zinc-700 p-3 rounded-lg border-l-2 border-l-${item.color}-500 shadow-inner mb-4">
+                            <div class="flex justify-between items-start mb-2 border-b border-zinc-800 pb-2">
+                                <p class="text-[10px] text-zinc-500 font-bold tracking-widest uppercase">📝 實戰例句</p>
+                                <div class="flex gap-3">
+                                    <button onclick="checkPronunciationLearning('${safeSentence}', this, '${item.color}')" class="text-zinc-400 hover:text-${item.color}-400 transition-colors text-sm" title="測驗例句">🎤</button>
+                                    <button onclick="speakWord('${safeSentence}')" class="text-zinc-400 hover:text-${item.color}-400 transition-colors text-sm" title="朗讀例句">🔊</button>
+                                </div>
+                            </div>
+                            <p class="text-sm font-bold text-zinc-200 mb-1">${item.en_eg}</p>
+                            <p class="text-xs text-zinc-500">${item.zh_eg}</p>
+                        </div>
 
                         <div class="mt-auto bg-zinc-900 border border-zinc-700 p-3 rounded-lg border-l-2 border-l-${item.color}-500 shadow-inner">
                             <p class="text-[10px] text-zinc-500 font-bold tracking-widest uppercase mb-1">📖 字根備份路徑</p>
@@ -324,18 +377,14 @@
             updateRaceTrack();
         }
 
-        // ================= 測驗系統邏輯 (9題全考 + 雙重核對) =================
+        // ================= 測驗系統邏輯 =================
 
         function initExam() {
-            // 取出過去 3 天的 9 個單字
             const startIndex = currentDayIndex - 2;
             examQuestions = wordDatabase.slice(startIndex * 3, (currentDayIndex + 1) * 3);
-            
-            // 隨機打亂這 9 題
             examQuestions = examQuestions.sort(() => 0.5 - Math.random());
             currentExamIndex = 0;
             
-            // 產生進度條格子
             const progressContainer = document.getElementById('exam-progress');
             progressContainer.innerHTML = '';
             for(let i=0; i<9; i++) {
@@ -368,7 +417,6 @@
                     <h3 class="text-6xl italic-fast text-white tracking-wider mb-4">${q.word}</h3>
                     
                     <div class="flex flex-col md:flex-row justify-center gap-4 mb-6">
-                        <!-- 任務 1: 發音核對 -->
                         <div id="task-pronounce" class="bg-zinc-800 p-4 rounded-lg border border-red-500/50 flex-1">
                             <p class="text-sm font-bold text-zinc-400 mb-2">任務 1：正確唸出單字</p>
                             <button id="exam-mic-btn" onclick="checkExamPronunciation('${q.word}')" class="w-full bg-red-600 hover:bg-red-500 text-white font-bold py-2 rounded shadow-[0_0_10px_rgba(220,38,38,0.5)] transition-all">
@@ -376,7 +424,6 @@
                             </button>
                         </div>
                         
-                        <!-- 任務 2: 釋義選擇 -->
                         <div id="task-meaning" class="bg-zinc-800 p-4 rounded-lg border border-cyan-500/50 flex-1">
                             <p class="text-sm font-bold text-zinc-400 mb-2">任務 2：選擇正確釋義</p>
                             <div class="text-sm text-cyan-400 font-bold" id="meaning-status">請在下方選擇...</div>
@@ -389,7 +436,6 @@
             `;
         }
 
-        // 考試專用發音核對
         function checkExamPronunciation(expectedText) {
             if (isPronunciationPassed) return;
             const btn = document.getElementById('exam-mic-btn');
@@ -425,7 +471,6 @@
             };
         }
 
-        // 考試專用釋義核對
         function checkMeaning(selectedWord, correctWord, btnElement) {
             if (isMeaningPassed) return;
             
@@ -448,7 +493,6 @@
 
         function checkIfBothPassed() {
             if (isPronunciationPassed && isMeaningPassed) {
-                // 標記上方進度條
                 document.getElementById(`dot-${currentExamIndex}`).classList.replace('bg-zinc-800', 'bg-green-500');
                 
                 setTimeout(() => {
@@ -491,6 +535,31 @@
             currentDayIndex++; 
             switchView('learning');
             document.getElementById('btn-next-day').classList.remove('hidden');
+        }
+
+        // ================= VIEW 3: 總複習單字庫邏輯 =================
+        function renderReviewList() {
+            const container = document.getElementById('review-list-container');
+            container.innerHTML = '';
+            
+            // 擷取目前為止所有解鎖（學過）的單字
+            const unlockedWords = wordDatabase.slice(0, (currentDayIndex + 1) * 3);
+            document.getElementById('review-count').innerText = unlockedWords.length;
+
+            unlockedWords.forEach((item) => {
+                container.innerHTML += `
+                    <div class="bg-zinc-900 border border-zinc-700 p-4 rounded-lg flex justify-between items-center border-l-4 border-l-${item.color}-500 mb-2 hover:bg-zinc-800 transition-colors shadow-sm">
+                        <div class="flex flex-col">
+                            <div class="flex items-center gap-2 mb-1">
+                                <h4 class="text-2xl italic-fast text-white w-28 md:w-32">${item.word}</h4>
+                                <span class="text-[10px] bg-zinc-800 text-zinc-400 px-2 py-0.5 rounded uppercase">${item.pos}</span>
+                            </div>
+                            <span class="text-sm font-bold text-zinc-300">${item.zh}</span>
+                        </div>
+                        <button onclick="speakWord('${item.word}')" class="text-2xl text-zinc-500 hover:text-${item.color}-400 transition-colors p-2" title="聆聽發音">🔊</button>
+                    </div>
+                `;
+            });
         }
 
         window.addEventListener('load', () => {
